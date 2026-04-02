@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Get Your Personalised Diet Plan | Niwi</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #2D6A4F;
+      --green-light: #52B788;
+      --cream: #FAFAF7;
+      --text: #1A1A1A;
+      --muted: #6B6B6B;
+      --border: #E0E0D8;
+      --error: #C0392B;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 48px 0;
+    }
+
+    /* HEADER BANNER */
+    .banner {
+      width: 100%;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .banner-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      color: var(--green);
+      letter-spacing: -0.5px;
+    }
+
+    .banner-logo span { color: var(--text); }
+
+    .banner-tagline {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+    }
+
+    .banner-stats {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .stars { color: #F4B400; font-size: 13px; }
+
+    .banner-transforms {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      width: 100%;
+      padding: 4px 0;
+      justify-content: center;
+    }
+
+    .transform-pill {
+      background: #F0FAF4;
+      border: 1px solid #B7E4C7;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--green);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* FORM CARD */
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 28px 24px 32px;
+      margin: 24px 16px 0;
+    }
+
+    .form-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .form-subtitle {
+      font-size: 13px;
+      color: var(--green);
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    label .req { color: var(--error); margin-left: 2px; }
+
+    input[type="text"],
+    input[type="tel"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      background: #fff;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    input:focus { border-color: var(--green-light); }
+
+    /* PHONE + OTP ROW */
+    .phone-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .phone-row input { flex: 1; }
+
+    .btn-send-otp {
+      padding: 12px 14px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .btn-send-otp:hover { background: #235A40; }
+    .btn-send-otp:disabled { background: #A8C5B5; cursor: not-allowed; }
+
+    .otp-input-row {
+      display: none;
+      margin-top: 10px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .otp-input-row.visible { display: flex; }
+
+    .otp-input-row input {
+      flex: 1;
+      letter-spacing: 4px;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .btn-verify-otp {
+      padding: 12px 14px;
+      background: var(--green-light);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .verified-badge {
+      display: none;
+      font-size: 13px;
+      color: var(--green);
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .verified-badge.visible { display: block; }
+
+    /* OPTIONS */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .option-btn {
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      line-height: 1.4;
+    }
+
+    .option-btn:hover { border-color: var(--green-light); background: #F0FAF4; }
+    .option-btn.selected { border-color: var(--green); background: #F0FAF4; color: var(--green); font-weight: 600; }
+
+    /* MEDICAL - 3 col on wider, 2 col mobile */
+    .medical-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* STATUS MSG */
+    .status-msg {
+      font-size: 12px;
+      margin-top: 5px;
+      min-height: 16px;
+    }
+    .status-msg.error { color: var(--error); }
+    .status-msg.success { color: var(--green); }
+
+    /* SUBMIT */
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      margin-top: 24px;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.2px;
+    }
+
+    .btn-submit:hover { background: #235A40; transform: translateY(-1px); }
+    .btn-submit:disabled { background: #A8C5B5; cursor: not-allowed; transform: none; }
+
+    .privacy-note {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+
+    /* SUCCESS SCREEN */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .success-screen.visible { display: block; }
+    .form-content.hidden { display: none; }
+
+    .success-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .success-screen h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .success-screen p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .whatsapp-cta {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 13px 24px;
+      background: #25D366;
+      color: #fff;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      font-family: 'DM Sans', sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BANNER -->
+  <div class="banner">
+    <div class="banner-logo">niwi<span>.ai</span></div>
+    <div class="banner-tagline">Real food. Real guidance. Real results.</div>
+    <div class="banner-stats">
+      <span class="stars">★★★★★</span>
+      <span>4.9 Google Rating &nbsp;·&nbsp; 10,000+ lives changed</span>
+    </div>
+    <div class="banner-transforms">
+      <span class="transform-pill">78kg → 65kg</span>
+      <span class="transform-pill">92kg → 78kg</span>
+      <span class="transform-pill">PCOS managed</span>
+      <span class="transform-pill">Diabetes controlled</span>
+    </div>
+  </div>
+
+  <!-- FORM CARD -->
+  <div class="card">
+    <div class="form-content" id="formContent">
+      <h1 class="form-title">Get Your Personalised Diet Plan</h1>
+      <p class="form-subtitle">Paid plans starting at ₹4,900/month</p>
+
+      <!-- NAME -->
+      <div class="form-group">
+        <label for="name">Your Name <span class="req">*</span></label>
+        <input type="text" id="name" placeholder="First name" autocomplete="given-name"/>
+        <div class="status-msg error" id="nameError"></div>
+      </div>
+
+      <!-- PHONE + OTP -->
+      <div class="form-group">
+        <label for="phone">Phone Number <span class="req">*</span></label>
+        <div class="phone-row">
+          <input type="tel" id="phone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric"/>
+          <button class="btn-send-otp" id="btnSendOtp" onclick="sendOtp()">Send OTP</button>
+        </div>
+        <div class="otp-input-row" id="otpRow">
+          <input type="tel" id="otpInput" placeholder="Enter OTP" maxlength="6" inputmode="numeric"/>
+          <button class="btn-verify-otp" onclick="verifyOtp()">Verify</button>
+        </div>
+        <div class="verified-badge" id="verifiedBadge">✓ Number verified</div>
+        <div class="status-msg" id="phoneStatus"></div>
+      </div>
+
+      <!-- GOAL -->
+      <div class="form-group">
+        <label>What is your goal? <span class="req">*</span></label>
+        <div class="options-grid" id="goalOptions">
+          <button class="option-btn" onclick="selectOption('goal', this, 'Lose weight')">Lose weight</button>
+          <button class="option-btn" onclick="selectOption('goal', this, 'Gain weight')">Gain weight</button>
+          <button class="option-btn" onclick="selectOption('goal', this, 'Eat healthier')">Eat healthier</button>
+          <button class="option-btn" onclick="selectOption('goal', this, 'Manage a health condition')">Manage a health condition</button>
+        </div>
+        <div class="status-msg error" id="goalError"></div>
+      </div>
+
+      <!-- MEDICAL CONDITION -->
+      <div class="form-group">
+        <label>Medical condition (if any) <span class="req">*</span></label>
+        <div class="medical-grid" id="medicalOptions">
+          <button class="option-btn" onclick="selectOption('medical', this, 'Diabetes')">Diabetes</button>
+          <button class="option-btn" onclick="selectOption('medical', this, 'PCOS / PCOD')">PCOS / PCOD</button>
+          <button class="option-btn" onclick="selectOption('medical', this, 'Thyroid')">Thyroid</button>
+          <button class="option-btn" onclick="selectOption('medical', this, 'High BP / Cholesterol')">High BP / Cholesterol</button>
+          <button class="option-btn" onclick="selectOption('medical', this, 'None')">None</button>
+          <button class="option-btn" onclick="selectOption('medical', this, 'Other')">Other</button>
+        </div>
+        <div class="status-msg error" id="medicalError"></div>
+      </div>
+
+      <button class="btn-submit" id="btnSubmit" onclick="submitForm()">Get My Diet Plan</button>
+      <p class="privacy-note">Your details are safe with us. No spam, ever.</p>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="successScreen">
+      <div class="success-icon">🥗</div>
+      <h2>You are all set!</h2>
+      <p>Our dietitian team will reach out to you within a few hours.<br/>Save our number to stay connected on WhatsApp.</p>
+      <a class="whatsapp-cta" href="https://wa.me/919266429123" target="_blank">Save on WhatsApp</a>
+    </div>
+  </div>
+
+  <!-- MSG91 OTP -->
+  <script type="text/javascript">
+    // REPLACE THIS WITH YOUR ACTUAL TOKEN FROM MSG91
+    var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxb9AIkaQkyGZ_StLn8_bV1Aufk3zHIRKqTldqPJpdIc0gQGYxsQ0e3tAwuKj7mwuk/exec';
+
+    var otpVerified = false;
+    var selectedGoal = '';
+    var selectedMedical = '';
+    var otpToken = '';
+
+    var configuration = {
+      widgetId: "366462657168303336303835",
+      tokenAuth: "505035T5lIG7hQ69cdfd1eP1",
+      exposeMethods: true,
+      success: (data) => {
+        otpToken = data.token || '';
+        otpVerified = true;
+        document.getElementById('otpRow').classList.remove('visible');
+        document.getElementById('verifiedBadge').classList.add('visible');
+        document.getElementById('phoneStatus').textContent = '';
+        document.getElementById('phoneStatus').className = 'status-msg';
+        document.getElementById('phone').disabled = true;
+        document.getElementById('btnSendOtp').disabled = true;
+      },
+      failure: (error) => {
+        document.getElementById('phoneStatus').textContent = 'OTP verification failed. Please try again.';
+        document.getElementById('phoneStatus').className = 'status-msg error';
+      }
+    };
+
+    (function loadOtpScript(urls) {
+      let i = 0;
+      function attempt() {
+        const s = document.createElement('script');
+        s.src = urls[i];
+        s.async = true;
+        s.onload = () => {
+          if (typeof window.initSendOTP === 'function') {
+            window.initSendOTP(configuration);
+          }
+        };
+        s.onerror = () => {
+          i++;
+          if (i < urls.length) attempt();
+        };
+        document.head.appendChild(s);
+      }
+      attempt();
+    })([
+      'https://verify.msg91.com/otp-provider.js',
+      'https://verify.phone91.com/otp-provider.js'
+    ]);
+
+    function sendOtp() {
+      var phone = document.getElementById('phone').value.trim();
+      var statusEl = document.getElementById('phoneStatus');
+
+      if (!/^[6-9]\d{9}$/.test(phone)) {
+        statusEl.textContent = 'Enter a valid 10-digit Indian mobile number.';
+        statusEl.className = 'status-msg error';
+        return;
+      }
+
+      statusEl.textContent = 'Sending OTP...';
+      statusEl.className = 'status-msg';
+
+      var attempts = 0;
+      function trySend() {
+        if (window.sendOTP) {
+          window.sendOTP(phone, (data) => {
+            document.getElementById("otpRow").classList.add("visible");
+            statusEl.textContent = "OTP sent to +91 " + phone;
+            statusEl.className = "status-msg success";
+            document.getElementById("btnSendOtp").textContent = "Resend";
+          }, (err) => {
+            statusEl.textContent = "Could not send OTP. Please try again.";
+            statusEl.className = "status-msg error";
+          });
+        } else if (attempts < 10) {
+          attempts++;
+          setTimeout(trySend, 500);
+        } else {
+          statusEl.textContent = "Could not load OTP service. Please refresh and try again.";
+          statusEl.className = "status-msg error";
+        }
+      }
+      trySend();
+    }
+
+    function verifyOtp() {
+      var otp = document.getElementById('otpInput').value.trim();
+      var statusEl = document.getElementById('phoneStatus');
+
+      if (otp.length < 4) {
+        statusEl.textContent = 'Enter the OTP you received.';
+        statusEl.className = 'status-msg error';
+        return;
+      }
+
+      statusEl.textContent = 'Verifying...';
+      statusEl.className = 'status-msg';
+
+      if (window.verifyOTP) {
+        window.verifyOTP(otp, (data) => {
+          // success handled by configuration.success callback
+        }, (err) => {
+          statusEl.textContent = 'Wrong OTP. Please try again.';
+          statusEl.className = 'status-msg error';
+        });
+      }
+    }
+
+    function selectOption(type, el, value) {
+      var containerId = type === 'goal' ? 'goalOptions' : 'medicalOptions';
+      var container = document.getElementById(containerId);
+      container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+      el.classList.add('selected');
+      if (type === 'goal') selectedGoal = value;
+      if (type === 'medical') selectedMedical = value;
+    }
+
+    function getSourceParam() {
+      var params = new URLSearchParams(window.location.search);
+      return params.get('src') || 'direct';
+    }
+
+    function submitForm() {
+      var name = document.getElementById('name').value.trim();
+      var phone = document.getElementById('phone').value.trim();
+      var valid = true;
+
+      document.getElementById('nameError').textContent = '';
+      document.getElementById('goalError').textContent = '';
+      document.getElementById('medicalError').textContent = '';
+
+      if (!name) {
+        document.getElementById('nameError').textContent = 'Please enter your name.';
+        valid = false;
+      }
+
+      if (!otpVerified) {
+        document.getElementById('phoneStatus').textContent = 'Please verify your phone number first.';
+        document.getElementById('phoneStatus').className = 'status-msg error';
+        valid = false;
+      }
+
+      if (!selectedGoal) {
+        document.getElementById('goalError').textContent = 'Please select your goal.';
+        valid = false;
+      }
+
+      if (!selectedMedical) {
+        document.getElementById('medicalError').textContent = 'Please select an option.';
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      var btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      var payload = {
+        name: name,
+        phone: phone,
+        goal: selectedGoal,
+        medical: selectedMedical,
+        source: getSourceParam()
+      };
+
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+      .then(() => showSuccess())
+      .catch(() => showSuccess()); // show success even if sheet write fails, don't block the user
+    }
+
+    function showSuccess() {
+      document.getElementById('formContent').classList.add('hidden');
+      document.getElementById('successScreen').classList.add('visible');
+    }
+  </script>
+
+</body>
+</html>
