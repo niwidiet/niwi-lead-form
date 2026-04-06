@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Niwi | Personalized Nutrition & Dietetics</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { primary: '#16a34a', primaryDark: '#15803d' } } }
+        }
+    </script>
+    <style>
+        * { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+        html { scroll-padding-top: 68px; }
+
+        .shimmer {
+            background: linear-gradient(90deg,#f1f5f9 25%,#e8edf2 50%,#f1f5f9 75%);
+            background-size: 400% 100%;
+            animation: shimmer 1.8s infinite;
+        }
+        @keyframes shimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+
+        .no-scroll::-webkit-scrollbar { display:none; }
+        .no-scroll { -ms-overflow-style:none; scrollbar-width:none; }
+
+        /* Review modal */
+        .modal-wrap {
+            display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,.5); z-index:200;
+            backdrop-filter:blur(4px);
+            align-items:flex-end; justify-content:center;
+        }
+        .modal-wrap.open { display:flex; }
+        @media(min-width:640px){
+            .modal-wrap { align-items:center; }
+            .modal-inner { border-radius:1.5rem!important; max-width:480px; }
+        }
+        .modal-inner {
+            background:#fff; border-radius:1.5rem 1.5rem 0 0;
+            padding:2rem 1.5rem 2.5rem; width:100%;
+            max-height:80vh; overflow-y:auto;
+            animation:slideUp .25s ease;
+        }
+        @keyframes slideUp { from{transform:translateY(50px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+        /* Step dots */
+        .dot { width:8px; height:8px; border-radius:9999px; background:#e2e8f0; transition:all .25s; }
+        .dot.on { background:#16a34a; width:22px; }
+
+        /* Input focus */
+        input:focus, select:focus {
+            outline:none; border-color:#16a34a!important;
+            box-shadow:0 0 0 3px rgba(22,163,74,.12);
+        }
+
+        /* Review card clamp */
+        .clamp3 {
+            display:-webkit-box;
+            -webkit-line-clamp:3;
+            -webkit-box-orient:vertical;
+            overflow:hidden;
+        }
+
+        /* Floating bar mobile */
+        .floating-bar {
+            position:fixed; bottom:0; inset-x:0; z-index:100;
+            background:#fff; border-top:1px solid #f1f5f9;
+            padding:.875rem 1.25rem 1.25rem;
+        }
+
+        /* OTP boxes */
+        .otp-box {
+            width:64px; height:64px;
+            text-align:center; font-size:1.6rem; font-weight:700;
+            caret-color:#16a34a;
+            border:2px solid #e2e8f0; border-radius:14px;
+            background:#f8fafc; outline:none;
+            transition:border-color .15s, box-shadow .15s;
+            font-family:'Plus Jakarta Sans', system-ui, sans-serif;
+        }
+        .otp-box:focus { border-color:#16a34a; box-shadow:0 0 0 3px rgba(22,163,74,.12); background:#f0fdf4; }
+        .otp-box.filled { border-color:#16a34a; background:#f0fdf4; }
+        .otp-box.error  { border-color:#ef4444; background:#fff1f1; animation: shake .35s ease; }
+        @keyframes shake {
+            0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 60%{transform:translateX(5px)}
+        }
+    </style>
+</head>
+<body class="bg-white text-slate-800 antialiased">
+
+<!-- ═══ HEADER ═══ -->
+<header class="fixed top-0 inset-x-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100">
+    <div class="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
+        <a href="#">
+            <img src="logo.png" alt="Niwi" class="h-9" onerror="this.onerror=null;this.src='';this.alt='niwi.'">
+        </a>
+        <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-500">
+            <a href="#conditions" class="hover:text-slate-900 transition-colors">Conditions</a>
+            <a href="#results"    class="hover:text-slate-900 transition-colors">Results</a>
+            <a href="#team"       class="hover:text-slate-900 transition-colors">Our Team</a>
+            <a href="#lead-form"  class="bg-green-600 text-white px-5 py-2.5 rounded-full hover:bg-green-700 transition-colors">Book Free Consult</a>
+        </nav>
+        <a href="#lead-form" class="md:hidden bg-green-600 text-white text-sm font-bold px-4 py-2 rounded-full">Get Started</a>
+    </div>
+</header>
+
+<main class="pt-16">
+
+<!-- ═══ HERO ═══ -->
+<section style="background:linear-gradient(150deg,#f0fdf4 0%,#ffffff 55%)" class="relative overflow-hidden">
+    <div class="absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-25" style="background:radial-gradient(circle,#bbf7d0,transparent 70%)"></div>
+    <div class="max-w-5xl mx-auto px-5 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center">
+
+        <!-- Copy -->
+        <div>
+            <div class="inline-flex items-center gap-2 bg-green-100 text-green-700 px-3.5 py-1.5 rounded-full text-xs font-bold mb-6">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                India's Trusted Dietitian Network
+            </div>
+            <h1 class="text-4xl md:text-[3.2rem] leading-[1.08] font-extrabold text-slate-900 mb-5">
+                Eat What You Love.<br><span class="text-green-600">Still Get Results.</span>
+            </h1>
+            <p class="text-slate-500 text-[15px] md:text-base leading-relaxed mb-8 max-w-md">
+                Expert dietitians. Personalised kitchen-friendly plans. No crash diets — sustainable results built around your life.
+            </p>
+            <div class="flex gap-8 mb-8">
+                <div><div class="text-2xl font-extrabold text-slate-900">10K+</div><div class="text-xs text-slate-500 mt-0.5 font-medium">Clients</div></div>
+                <div class="w-px bg-slate-200"></div>
+                <div><div class="text-2xl font-extrabold text-slate-900">4.9 ★</div><div class="text-xs text-slate-500 mt-0.5 font-medium">Google</div></div>
+                <div class="w-px bg-slate-200"></div>
+                <div><div class="text-2xl font-extrabold text-slate-900">30+</div><div class="text-xs text-slate-500 mt-0.5 font-medium">Experts</div></div>
+            </div>
+            <a href="#lead-form" class="md:hidden inline-flex items-center gap-2 bg-green-600 text-white font-bold px-7 py-3.5 rounded-xl shadow-lg shadow-green-600/20">
+                Book Free Consultation
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+
+        <!-- FORM -->
+        <div id="lead-form" class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 relative overflow-hidden">
+            <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-t-3xl"></div>
+            <div class="flex gap-1.5 mb-5">
+                <div class="dot on" id="d1"></div>
+                <div class="dot" id="d2"></div>
+                <div class="dot" id="d3"></div>
+            </div>
+
+            <!-- Step 1 -->
+            <div id="s1">
+                <h3 class="text-lg font-extrabold text-slate-900 mb-1">Book Free Consultation</h3>
+                <p class="text-sm text-slate-500 mb-5">Takes 30 seconds. No spam.</p>
+                <div class="space-y-3.5">
+                    <!-- Full Name -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">Full Name</label>
+                        <input id="f-name" type="text" placeholder="Priya Sharma"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm transition-all">
+                    </div>
+                    <!-- Mobile -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">Mobile Number</label>
+                        <div class="flex">
+                            <span class="inline-flex items-center px-3 text-sm font-semibold text-slate-500 bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl select-none">+91</span>
+                            <input id="f-phone" type="tel" maxlength="10" placeholder="98765 43210"
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-r-xl text-sm transition-all">
+                        </div>
+                    </div>
+                    <!-- Health Concern -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">Health Concern</label>
+                        <select id="f-goal" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm transition-all appearance-none cursor-pointer">
+                            <option value="">Select your concern</option>
+                            <option>Weight Loss</option>
+                            <option>PCOS / Hormonal Health</option>
+                            <option>Diabetes Management</option>
+                            <option>Thyroid</option>
+                            <option>Gut / Digestive Health</option>
+                            <option>Post-Pregnancy Weight</option>
+                            <option>Muscle Gain</option>
+                            <option>Overall Wellness</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <!-- Ready to invest -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">Ready to invest in your health?</label>
+                        <select id="f-invest" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm transition-all appearance-none cursor-pointer">
+                            <option value="">Select an option</option>
+                            <option>Yes, ready to start now</option>
+                            <option>No, just exploring</option>
+                            </select>
+                    </div>
+                    <button onclick="startOTP()"
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-green-600/20">
+                        Get Free Consultation
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                    <p class="text-[11px] text-center text-slate-400 flex items-center justify-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                        Your info is private &amp; never shared
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 2: OTP -->
+            <div id="s2" class="hidden">
+                <button onclick="goStep(1)" class="flex items-center gap-1.5 text-sm text-slate-400 font-medium mb-4 hover:text-slate-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+                    Back
+                </button>
+                <h3 class="text-lg font-extrabold text-slate-900 mb-1">Verify Your Number</h3>
+                <p class="text-sm text-slate-500 mb-6">Enter the 4-digit OTP sent to <span id="otp-num" class="font-bold text-slate-700"></span></p>
+
+                <!-- 4-digit OTP boxes -->
+                <div class="flex gap-3 justify-center mb-3" id="otp-boxes">
+                    <input class="otp-box" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                    <input class="otp-box" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input class="otp-box" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input class="otp-box" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                </div>
+
+                <!-- Error message — always in DOM, toggled via hidden class -->
+                <div id="otp-err-wrap" class="hidden flex items-center gap-1.5 bg-red-50 border border-red-200 rounded-xl px-3 py-2 mb-3">
+                    <svg class="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                    <p id="otp-err-text" class="text-xs text-red-600 font-semibold">Incorrect OTP. Please try again.</p>
+                </div>
+
+                <button id="verify-btn" onclick="submitOTPForm()"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-green-600/20">
+                    Verify &amp; Continue
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <p class="text-xs text-slate-400 text-center mt-4">
+                    Didn't get it? <button onclick="resendOTP()" class="text-green-600 font-bold underline ml-1">Resend OTP</button>
+                </p>
+            </div>
+
+            <!-- Step 3: Success -->
+            <div id="s3" class="hidden text-center py-4">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-900 mb-2">You're All Set! 🎉</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Our team will WhatsApp you within <strong class="text-slate-700">24 hours</strong> to schedule your free consultation.</p>
+                <div class="mt-5 p-3 bg-green-50 rounded-xl border border-green-100 text-xs text-green-700 font-semibold">
+                    💚 Expect a message from our team soon
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ═══ TRUST BAR ═══ -->
+<div class="border-y border-slate-100 bg-slate-50 overflow-x-auto no-scroll">
+    <div class="max-w-5xl mx-auto px-5 py-3 flex gap-6 md:justify-center whitespace-nowrap">
+        <span class="text-sm font-semibold text-slate-600 shrink-0"><span class="text-amber-500 mr-1">✦</span>Certified Dietitians</span>
+        <span class="text-sm font-semibold text-slate-600 shrink-0"><span class="text-green-600 mr-1">✦</span>WhatsApp Support</span>
+        <span class="text-sm font-semibold text-slate-600 shrink-0"><span class="text-blue-500 mr-1">✦</span>No Crash Diets</span>
+        <span class="text-sm font-semibold text-slate-600 shrink-0"><span class="text-purple-500 mr-1">✦</span>Video Sessions</span>
+        <span class="text-sm font-semibold text-slate-600 shrink-0"><span class="text-rose-500 mr-1">✦</span>PCOS Specialists</span>
+    </div>
+</div>
+
+<!-- ═══ HEALTH CONDITIONS ═══ -->
+<section id="conditions" class="py-14 bg-white">
+    <div class="max-w-5xl mx-auto px-5">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2 text-center">Conditions We Help With</h2>
+        <p class="text-slate-500 text-sm text-center mb-10">Evidence-based nutrition for a wide range of health goals and medical conditions</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+            <div class="bg-green-50 border border-green-100 rounded-2xl p-4 flex items-start gap-3">
+                <span class="text-xl mt-0.5">⚖️</span>
+                <div><p class="font-bold text-sm text-slate-900">Weight Loss</p><p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Sustainable fat loss without crash diets</p></div>
+            </div>
+
+            <div class="bg-pink-50 border border-pink-100 rounded-2xl p-4 flex items-start gap-3">
+                <span class="text-xl mt-0.5">🌸</span>
+                <div><p class="font-bold text-sm text-slate-900">PCOS / PCOD</p><p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Hormonal balance through targeted nutrition</p></div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
+                <span class="text-xl mt-0.5">🩸</span>
+                <div><p class="font-bold text-sm text-slate-900">Diabetes</p><p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Blood sugar control via diet management</p></div>
+            </div>
+
+            <div class="bg-purple-50 border border-purple-100 rounded-2xl p-4 flex items-start gap-3">
+                <span class="text-xl mt-0.5">🦋</span>
+                <div><p class="font-bold text-sm text-slate-900">Thyroid</p><p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Hypo & hyperthyroid dietary support</p></div>
+            </div>
+
+            <div class="bg-orange-50 border border-orange-100 rounded-2xl p-4 flex items-start gap-3">
+                <span class="text-xl mt-0.5">🌿</span>
+                <div><p class="font-bold text-sm text-slate-900">Gut Health</p><p class="text-xs text-slate-500 mt-0.5 leading-relaxed">IBS, bloating & digestive wellness</p></div>
+            </div>
+
+            <div class="bg-rose-50 border border-rose-100 rounded-2xl p-4 flex items-start gap-3">
+                <span class="text-xl mt-0.5">👶</span>
+                <div><p class="font-bold text-sm text-slate-900">Post-Pregnancy</p><p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Safe recovery & weight management</p></div>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex items-start gap-3">
+                <span class="text-xl mt-0.5">💪</span>
+                <div><p class="font-bold text-sm text-slate-900">Muscle Gain</p><p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Sport & performance nutrition plans</p></div>
+            </div>
+
+            <div class="bg-teal-50 border border-teal-100 rounded-2xl p-4 flex items-start gap-3">
+                <span class="text-xl mt-0.5">❤️</span>
+                <div><p class="font-bold text-sm text-slate-900">Heart Health</p><p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Cholesterol & blood pressure support</p></div>
+            </div>
+
+            <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex items-start gap-3">
+                <span class="text-xl mt-0.5">🫀</span>
+                <div><p class="font-bold text-sm text-slate-900">Cholesterol</p><p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Lipid profile management via food</p></div>
+            </div>
+
+            <div class="bg-cyan-50 border border-cyan-100 rounded-2xl p-4 flex items-start gap-3">
+                <span class="text-xl mt-0.5">🦴</span>
+                <div><p class="font-bold text-sm text-slate-900">Bone & Joint</p><p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Calcium, D3 & B12 deficiency support</p></div>
+            </div>
+
+            <div class="bg-lime-50 border border-lime-100 rounded-2xl p-4 flex items-start gap-3">
+                <span class="text-xl mt-0.5">🧠</span>
+                <div><p class="font-bold text-sm text-slate-900">Energy & Fatigue</p><p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Improve stamina and daily vitality</p></div>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-start gap-3">
+                <span class="text-xl mt-0.5">✨</span>
+                <div><p class="font-bold text-sm text-slate-900">Skin & Hair</p><p class="text-xs text-slate-500 mt-0.5 leading-relaxed">Nutrition for glow, hair fall & acne</p></div>
+            </div>
+
+        </div>
+        <div class="mt-8 text-center">
+            <a href="#lead-form" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-7 py-3.5 rounded-xl transition-colors shadow-lg shadow-green-600/20">
+                Talk to a Dietitian Free
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ REVIEWS ═══ -->
+<section class="py-14 bg-slate-50 border-y border-slate-100">
+    <div class="max-w-5xl mx-auto px-5">
+        <div class="flex items-end justify-between mb-8">
+            <div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Client Stories</h2>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-amber-400 text-sm">★★★★★</span>
+                    <span class="text-sm font-bold text-slate-700">4.9</span>
+                    <span class="text-xs text-slate-400 font-medium">on Google Reviews</span>
+                </div>
+            </div>
+            <div class="hidden md:flex w-10 h-10 rounded-full border border-slate-200 items-center justify-center shadow-sm bg-white shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            </div>
+        </div>
+        <div class="flex gap-4 overflow-x-auto no-scroll pb-2 md:grid md:grid-cols-3 md:overflow-visible">
+
+            <div class="min-w-[265px] md:min-w-0 bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-shadow" onclick="openReview(0)">
+                <div class="flex items-center gap-3 mb-3"><div class="w-9 h-9 rounded-full overflow-hidden shrink-0">
+    <img src="Greviews/danish.png" alt="Danish Wali" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\'w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm\'>DW</span>'">
+</div><div><p class="text-sm font-bold text-slate-900">Danish Wali</p><p class="text-amber-400 text-xs">★★★★★</p></div></div>
+                <p class="text-[13px] text-slate-600 leading-relaxed clamp3">Amazing experience with Insha from niwi.ai. She listens, understands your lifestyle, and creates a plan that's never extreme. Steady progress and way more confident about eating now.</p>
+                <span class="text-xs text-green-600 font-semibold mt-2 inline-block">Read full review →</span>
+            </div>
+
+            <div class="min-w-[265px] md:min-w-0 bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-shadow" onclick="openReview(1)">
+                <div class="flex items-center gap-3 mb-3"><div class="w-9 h-9 rounded-full overflow-hidden shrink-0">
+    <img src="Greviews/sharada.png" alt="Danish Wali" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\'w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm\'>DW</span>'">
+</div><div><p class="text-sm font-bold text-slate-900">Sharada Panwar</p><p class="text-amber-400 text-xs">★★★★★</p></div></div>
+                <p class="text-[13px] text-slate-600 leading-relaxed clamp3">Weight down 101 → 96 kg. Energy improved, sugar cravings gone. Swata Marik's kitchen-friendly plan suited my medical condition. Never felt like a punishment.</p>
+                <span class="text-xs text-green-600 font-semibold mt-2 inline-block">Read full review →</span>
+            </div>
+
+            <div class="min-w-[265px] md:min-w-0 bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-shadow" onclick="openReview(2)">
+                <div class="flex items-center gap-3 mb-3"><div class="w-9 h-9 rounded-full overflow-hidden shrink-0">
+    <img src="Greviews/kiran.png" alt="Danish Wali" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\'w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm\'>DW</span>'">
+</div><div><p class="text-sm font-bold text-slate-900">Kiran Singh</p><p class="text-amber-400 text-xs">★★★★★</p></div></div>
+                <p class="text-[13px] text-slate-600 leading-relaxed clamp3">2 months in — sugar managed, D3 & B12 improved, hemoglobin up, back to normal shape. Swata Marik accommodates every request. Highly recommend.</p>
+                <span class="text-xs text-green-600 font-semibold mt-2 inline-block">Read full review →</span>
+            </div>
+
+            <div class="min-w-[265px] md:min-w-0 bg-green-50 border border-green-100 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-shadow" onclick="openReview(3)">
+                <div class="flex items-center gap-3 mb-3"><div class="w-9 h-9 rounded-full overflow-hidden shrink-0">
+    <img src="Greviews/ashita.png" alt="Danish Wali" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\'w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm\'>DW</span>'">
+</div><div><p class="text-sm font-bold text-slate-900">Ashita Tiwari</p><p class="text-amber-400 text-xs">★★★★★</p></div></div>
+                <p class="text-[13px] text-slate-600 leading-relaxed clamp3">Lost 3.7 kg in 20 days! Energy up by day 5, bloating gone. Meals were full and satisfying. Ruchi Mahajan & Gouri Masurkar are phenomenal.</p>
+                <span class="text-xs text-green-600 font-semibold mt-2 inline-block">Read full review →</span>
+            </div>
+
+            <div class="min-w-[265px] md:min-w-0 bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-shadow" onclick="openReview(4)">
+                <div class="flex items-center gap-3 mb-3"><div class="w-9 h-9 rounded-full overflow-hidden shrink-0">
+    <img src="Greviews/arti.png" alt="Danish Wali" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\'w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm\'>DW</span>'">
+</div><div><p class="text-sm font-bold text-slate-900">Arti Pawarr</p><p class="text-amber-400 text-xs">★★★★★</p></div></div>
+                <p class="text-[13px] text-slate-600 leading-relaxed clamp3">Lost 10 kgs in 3 months with Divya Saigal. Healthy and sustainable. Amazing service with a friendly team that genuinely gets results.</p>
+                <span class="text-xs text-green-600 font-semibold mt-2 inline-block">Read full review →</span>
+            </div>
+
+            <div class="min-w-[265px] md:min-w-0 bg-pink-50 border border-pink-100 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-shadow" onclick="openReview(5)">
+                <div class="flex items-center gap-3 mb-3"><div class="w-9 h-9 rounded-full overflow-hidden shrink-0">
+    <img src="Greviews/laiba.png" alt="Danish Wali" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\'w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm\'>DW</span>'">
+</div><div><p class="text-sm font-bold text-slate-900">Laiba Noor Nabi</p><p class="text-amber-400 text-xs">★★★★★</p></div></div>
+                <p class="text-[13px] text-slate-600 leading-relaxed clamp3">Best decision for my PCOS. Dt Arisha's plan reduced bloating, made periods regular, and boosted my energy. Supportive and always available.</p>
+                <span class="text-xs text-green-600 font-semibold mt-2 inline-block">Read full review →</span>
+            </div>
+
+            <div class="min-w-[265px] md:min-w-0 bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-shadow" onclick="openReview(6)">
+                <div class="flex items-center gap-3 mb-3"><div class="w-9 h-9 rounded-full overflow-hidden shrink-0">
+    <img src="Greviews/arati.png" alt="Danish Wali" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\'w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm\'>DW</span>'">
+</div><div><p class="text-sm font-bold text-slate-900">Arati Mishra</p><p class="text-amber-400 text-xs">★★★★★</p></div></div>
+                <p class="text-[13px] text-slate-600 leading-relaxed clamp3">Lost 10 kgs with Harvinder Chauhan & Swata Marik. Kitchen-friendly, no extreme restrictions. Outstanding long-term results.</p>
+                <span class="text-xs text-green-600 font-semibold mt-2 inline-block">Read full review →</span>
+            </div>
+
+            <div class="min-w-[265px] md:min-w-0 bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-shadow" onclick="openReview(7)">
+                <div class="flex items-center gap-3 mb-3"><div class="w-9 h-9 rounded-full overflow-hidden shrink-0">
+    <img src="Greviews/mandavi.png" alt="Danish Wali" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\'w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm\'>DW</span>'">
+</div><div><p class="text-sm font-bold text-slate-900">Mandavi Sarraf</p><p class="text-amber-400 text-xs">★★★★★</p></div></div>
+                <p class="text-[13px] text-slate-600 leading-relaxed clamp3">Dt. Arisha Naeem changed my PCOD journey entirely. More energetic, finally in control. Simple plan, always listened, always understood.</p>
+                <span class="text-xs text-green-600 font-semibold mt-2 inline-block">Read full review →</span>
+            </div>
+
+            <div class="min-w-[265px] md:min-w-0 bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-shadow" onclick="openReview(8)">
+                <div class="flex items-center gap-3 mb-3"><div class="w-9 h-9 rounded-full overflow-hidden shrink-0">
+    <img src="Greviews/pooja.png" alt="Danish Wali" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\'w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm\'>DW</span>'">
+</div><div><p class="text-sm font-bold text-slate-900">Pooja Malhotra</p><p class="text-amber-400 text-xs">★★★★★</p></div></div>
+                <p class="text-[13px] text-slate-600 leading-relaxed clamp3">Working with Ruchi since 2016, even from Canada. Flexible, accommodating — removes the daily stress of "what do I cook". Perfect for long-term health.</p>
+                <span class="text-xs text-green-600 font-semibold mt-2 inline-block">Read full review →</span>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section id="how" class="py-14 bg-white border-b border-slate-100">
+    <div class="max-w-5xl mx-auto px-5">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-10 text-center">How Niwi Works</h2>
+        <div class="grid md:grid-cols-3 gap-5">
+            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                <div class="w-11 h-11 rounded-xl bg-green-100 flex items-center justify-center text-green-700 font-extrabold text-sm mb-4">01</div>
+                <h4 class="font-bold text-slate-900 mb-2">Free Consultation</h4>
+                <p class="text-sm text-slate-500 leading-relaxed">Share your health goals and history. We match you with the right senior dietitian for your needs.</p>
+            </div>
+            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                <div class="w-11 h-11 rounded-xl bg-slate-200 flex items-center justify-center text-slate-600 font-extrabold text-sm mb-4">02</div>
+                <h4 class="font-bold text-slate-900 mb-2">Your Custom Plan</h4>
+                <p class="text-sm text-slate-500 leading-relaxed">Kitchen-friendly diet built around your body, routine, and medical conditions. No fad diets, ever.</p>
+            </div>
+            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                <div class="w-11 h-11 rounded-xl bg-slate-200 flex items-center justify-center text-slate-600 font-extrabold text-sm mb-4">03</div>
+                <h4 class="font-bold text-slate-900 mb-2">Ongoing Support</h4>
+                <p class="text-sm text-slate-500 leading-relaxed">Regular video sessions, WhatsApp support, and plan adjustments as your body and goals evolve.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ BEFORE & AFTER (8 pairs) ═══ -->
+<section id="results" class="py-14 bg-slate-900 text-white">
+    <div class="max-w-5xl mx-auto px-5">
+        <h2 class="text-2xl md:text-3xl font-extrabold mb-2 text-center">Real Results</h2>
+        <p class="text-slate-400 text-sm text-center mb-10">From actual Niwi clients across India</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+            <!-- Pair 1 -->
+            <div class="bg-slate-800 rounded-2xl overflow-hidden">
+                <div class="grid grid-cols-2 gap-px bg-slate-700">
+                    <div class="relative aspect-[3/4] shimmer bg-slate-700">
+                        <img src="results/before-1.jpg" alt="Before" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Before</span>
+                    </div>
+                    <div class="relative aspect-[3/4] shimmer bg-slate-600">
+                        <img src="results/after-1.jpg" alt="After" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 right-1.5 bg-green-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">After</span>
+                    </div>
+                </div>
+                <div class="p-3"><p class="text-xs font-bold">Lost 10 kg</p><p class="text-[11px] text-slate-400 mt-0.5">3 months · Arti P.</p></div>
+            </div>
+
+            <!-- Pair 2 -->
+            <div class="bg-slate-800 rounded-2xl overflow-hidden">
+                <div class="grid grid-cols-2 gap-px bg-slate-700">
+                    <div class="relative aspect-[3/4] shimmer bg-slate-700">
+                        <img src="results/before-2.jpg" alt="Before" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Before</span>
+                    </div>
+                    <div class="relative aspect-[3/4] shimmer bg-slate-600">
+                        <img src="results/after-2.jpg" alt="After" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 right-1.5 bg-green-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">After</span>
+                    </div>
+                </div>
+                <div class="p-3"><p class="text-xs font-bold">Lost 3.7 kg</p><p class="text-[11px] text-slate-400 mt-0.5">20 days · Ashita T.</p></div>
+            </div>
+
+            <!-- Pair 3 -->
+            <div class="bg-slate-800 rounded-2xl overflow-hidden">
+                <div class="grid grid-cols-2 gap-px bg-slate-700">
+                    <div class="relative aspect-[3/4] shimmer bg-slate-700">
+                        <img src="results/before-3.jpg" alt="Before" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Before</span>
+                    </div>
+                    <div class="relative aspect-[3/4] shimmer bg-slate-600">
+                        <img src="results/after-3.jpg" alt="After" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 right-1.5 bg-green-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">After</span>
+                    </div>
+                </div>
+                <div class="p-3"><p class="text-xs font-bold">Lost 5 kg</p><p class="text-[11px] text-slate-400 mt-0.5">Sharada P.</p></div>
+            </div>
+
+            <!-- Pair 4 -->
+            <div class="bg-slate-800 rounded-2xl overflow-hidden">
+                <div class="grid grid-cols-2 gap-px bg-slate-700">
+                    <div class="relative aspect-[3/4] shimmer bg-slate-700">
+                        <img src="results/before-4.jpg" alt="Before" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Before</span>
+                    </div>
+                    <div class="relative aspect-[3/4] shimmer bg-slate-600">
+                        <img src="results/after-4.jpg" alt="After" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 right-1.5 bg-green-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">After</span>
+                    </div>
+                </div>
+                <div class="p-3"><p class="text-xs font-bold">PCOS Managed</p><p class="text-[11px] text-slate-400 mt-0.5">Laiba N.</p></div>
+            </div>
+
+            <!-- Pair 5 -->
+            <div class="bg-slate-800 rounded-2xl overflow-hidden">
+                <div class="grid grid-cols-2 gap-px bg-slate-700">
+                    <div class="relative aspect-[3/4] shimmer bg-slate-700">
+                        <img src="results/before-5.jpg" alt="Before" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Before</span>
+                    </div>
+                    <div class="relative aspect-[3/4] shimmer bg-slate-600">
+                        <img src="results/after-5.jpg" alt="After" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 right-1.5 bg-green-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">After</span>
+                    </div>
+                </div>
+                <div class="p-3"><p class="text-xs font-bold">Lost 10 kg</p><p class="text-[11px] text-slate-400 mt-0.5">Arati M.</p></div>
+            </div>
+
+            <!-- Pair 6 -->
+            <div class="bg-slate-800 rounded-2xl overflow-hidden">
+                <div class="grid grid-cols-2 gap-px bg-slate-700">
+                    <div class="relative aspect-[3/4] shimmer bg-slate-700">
+                        <img src="results/before-6.jpg" alt="Before" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Before</span>
+                    </div>
+                    <div class="relative aspect-[3/4] shimmer bg-slate-600">
+                        <img src="results/after-6.jpg" alt="After" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 right-1.5 bg-green-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">After</span>
+                    </div>
+                </div>
+                <div class="p-3"><p class="text-xs font-bold">Inch Loss</p><p class="text-[11px] text-slate-400 mt-0.5">Kiran S.</p></div>
+            </div>
+
+            <!-- Pair 7 -->
+            <div class="bg-slate-800 rounded-2xl overflow-hidden">
+                <div class="grid grid-cols-2 gap-px bg-slate-700">
+                    <div class="relative aspect-[3/4] shimmer bg-slate-700">
+                        <img src="results/before-7.jpg" alt="Before" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Before</span>
+                    </div>
+                    <div class="relative aspect-[3/4] shimmer bg-slate-600">
+                        <img src="results/after-7.jpg" alt="After" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 right-1.5 bg-green-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">After</span>
+                    </div>
+                </div>
+                <div class="p-3"><p class="text-xs font-bold">PCOD Recovery</p><p class="text-[11px] text-slate-400 mt-0.5">Mandavi S.</p></div>
+            </div>
+
+            <!-- Pair 8 -->
+            <div class="bg-slate-800 rounded-2xl overflow-hidden">
+                <div class="grid grid-cols-2 gap-px bg-slate-700">
+                    <div class="relative aspect-[3/4] shimmer bg-slate-700">
+                        <img src="results/before-8.jpg" alt="Before" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Before</span>
+                    </div>
+                    <div class="relative aspect-[3/4] shimmer bg-slate-600">
+                        <img src="results/after-8.jpg" alt="After" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        <span class="absolute bottom-1.5 right-1.5 bg-green-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">After</span>
+                    </div>
+                </div>
+                <div class="p-3"><p class="text-xs font-bold">Sustained Loss</p><p class="text-[11px] text-slate-400 mt-0.5">Pooja M.</p></div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ═══ TEAM ═══ -->
+<section id="team" class="py-14 bg-white">
+    <div class="max-w-5xl mx-auto px-5">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2 text-center">Meet Your Dietitians</h2>
+        <p class="text-slate-500 text-sm text-center mb-10">Senior certified experts dedicated to your success</p>
+
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-2xl p-6 flex items-center gap-5 mb-5 shadow-sm">
+            <div class="w-24 h-24 md:w-28 md:h-28 rounded-2xl shrink-0 overflow-hidden shimmer bg-slate-200">
+                <img src="Team/renu.webp" alt="Ms. Renu Puri" class="w-full h-full object-cover" onerror="this.style.display='none'">
+            </div>
+            <div>
+                <span class="inline-block bg-amber-100 text-amber-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider mb-2">Founding Dietitian · 30+ Years</span>
+                <h3 class="text-xl font-extrabold text-slate-900">Ms. Renu Puri</h3>
+                <p class="text-sm text-slate-500 mt-1.5 leading-relaxed max-w-md">Founding dietitian and face of Niwi. Trusted by high-profile clients and celebrities. Leads the premium programme with a team of senior dietitians.</p>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4">
+            <div class="border border-slate-100 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+                <div class="w-16 h-16 rounded-xl shrink-0 overflow-hidden shimmer bg-slate-100">
+                    <img src="Team/Ruchi.webp" alt="Ruchi Mahajan" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                </div>
+                <div>
+                    <span class="text-[10px] font-extrabold text-green-600 uppercase tracking-wide">Senior Dietitian</span>
+                    <h4 class="font-bold text-slate-900 mt-0.5">Ruchi Mahajan</h4>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Weight management & long-term nutrition. Clients across India and Canada.</p>
+                </div>
+            </div>
+            <div class="border border-slate-100 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+                <div class="w-16 h-16 rounded-xl shrink-0 overflow-hidden shimmer bg-slate-100">
+                    <img src="Team/Divya.webp" alt="Divya Saigal" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                </div>
+                <div>
+                    <span class="text-[10px] font-extrabold text-green-600 uppercase tracking-wide">Senior Dietitian</span>
+                    <h4 class="font-bold text-slate-900 mt-0.5">Divya Saigal</h4>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Clinical nutrition, diabetes & metabolic health specialist.</p>
+                </div>
+            </div>
+            <div class="border border-slate-100 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+                <div class="w-16 h-16 rounded-xl shrink-0 overflow-hidden shimmer bg-slate-100">
+                    <img src="Team/Harvinder.webp" alt="Harvinder.webp" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                </div>
+                <div>
+                    <span class="text-[10px] font-extrabold text-green-600 uppercase tracking-wide">Senior Dietitian</span>
+                    <h4 class="font-bold text-slate-900 mt-0.5">Harvinder Chauhan</h4>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Hormonal health, PCOS & women's nutrition expert.</p>
+                </div>
+            </div>
+        </div>
+
+        <a href="#lead-form" class="mt-10 block w-full max-w-sm mx-auto text-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl transition-colors shadow-md">
+            Start Your Transformation →
+        </a>
+    </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="bg-slate-50 border-t border-slate-100 py-10 px-5 text-center pb-24 md:pb-10">
+    <div class="max-w-5xl mx-auto">
+        <a href="#" class="inline-block mb-5">
+            <img src="logo.png" alt="Niwi" class="h-8 mx-auto" onerror="this.onerror=null;this.src='';this.alt='niwi.'">
+        </a>
+        <div class="flex justify-center gap-5 text-sm text-slate-400 mb-4">
+            <a href="https://www.niwi.ai/diet/privacy-policy" target="_blank" class="hover:text-green-600 transition-colors font-medium">Privacy Policy</a>
+            <span>·</span>
+            <a href="https://www.niwi.ai/diet/terms-of-use" class="hover:text-green-600 transition-colors font-medium">Terms of Service</a>
+        </div>
+        <p class="text-xs text-slate-300">© 2026 Niwiai Private Limited. All rights reserved.</p>
+    </div>
+</footer>
+
+</main>
+
+<!-- ═══ FLOATING CTA ═══ -->
+<div class="floating-bar md:hidden">
+    <a href="#lead-form" class="block w-full bg-green-600 text-white font-bold py-3.5 rounded-2xl text-center text-sm shadow-lg shadow-green-600/20">
+        🌿 Book Free Consultation — No Cost, No Obligation
+    </a>
+</div>
+
+<!-- ═══ REVIEW MODAL ═══ -->
+<div id="rev-modal" class="modal-wrap" onclick="if(event.target===this)closeReview()">
+    <div class="modal-inner">
+        <div class="flex items-center justify-between mb-3">
+            <h3 id="m-name" class="font-extrabold text-lg text-slate-900"></h3>
+            <button onclick="closeReview()" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <p class="text-amber-400 text-sm mb-4">★★★★★</p>
+        <p id="m-text" class="text-sm text-slate-600 leading-relaxed"></p>
+        <a href="#lead-form" onclick="closeReview()" class="mt-6 block w-full bg-green-600 text-white font-bold py-3 rounded-xl text-center text-sm hover:bg-green-700 transition-colors">
+            Book My Free Consultation
+        </a>
+    </div>
+</div>
+
+<!-- ═══ MSG91: sends the OTP only ═══ -->
+<script>
+    var configuration = {
+        widgetId: "366462657168303336303835",
+        tokenAuth: "505035T5llG7hQ69cdfd1eP1",
+        identifier: "",
+        exposeMethods: true,
+        success: function(data) { submitLead(data.token || data.message || 'verified'); },
+        failure: function(error) {
+            var btn = document.getElementById("verify-btn");
+            if (btn) { btn.disabled = false; btn.innerHTML = "Verify &amp; Continue"; }
+            showErr("Incorrect OTP. Please try again.");
+            clearBoxes();
+            var boxes = getBoxes(); if(boxes[0]) boxes[0].focus();
+        }
+    };
+    (function loadOTP(urls) {
+        var i = 0;
+        function attempt() {
+            var s = document.createElement('script');
+            s.src = urls[i]; s.async = true;
+            s.onload = function() {
+                if (typeof window.initSendOTP === 'function') window.initSendOTP(configuration);
+            };
+            s.onerror = function() { if (++i < urls.length) attempt(); };
+            document.body.appendChild(s);
+        }
+        attempt();
+    })(['https://verify.msg91.com/otp-provider.js','https://verify.phone91.com/otp-provider.js']);
+</script>
+
+<!-- ═══ APP LOGIC ═══ -->
+<script>
+    var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbx8PO16m_zU72IZBueN5xoV8VYvQB-WPQ3OEXJThut6EqcSqj7KYdSnF3KKg4FfCpEy/exec';
+
+    /* ── Steps ── */
+    function goStep(n) {
+        [1,2,3].forEach(function(x) {
+            document.getElementById('s'+x).classList.toggle('hidden', x !== n);
+            document.getElementById('d'+x).classList.toggle('on', x <= n);
+        });
+        document.getElementById('lead-form').scrollIntoView({behavior:'smooth', block:'start'});
+        if (n === 2) setTimeout(function(){ getBoxes()[0].focus(); }, 150);
+    }
+
+    /* ── OTP box helpers ── */
+    function getBoxes() { return Array.from(document.querySelectorAll('#otp-boxes .otp-box')); }
+    function getOTP()   { return getBoxes().map(function(b){ return b.value; }).join(''); }
+
+    function showErr(msg) {
+        var wrap = document.getElementById('otp-err-wrap');
+        var txt  = document.getElementById('otp-err-text');
+        txt.textContent = msg || 'Incorrect OTP. Please try again.';
+        wrap.classList.remove('hidden');
+        /* shake the boxes */
+        getBoxes().forEach(function(b) {
+            b.classList.add('error');
+            setTimeout(function(){ b.classList.remove('error'); }, 400);
+        });
+    }
+    function hideErr() { document.getElementById('otp-err-wrap').classList.add('hidden'); }
+
+    function clearBoxes() {
+        getBoxes().forEach(function(b){ b.value=''; b.classList.remove('filled','error'); });
+    }
+
+    /* ── Wire OTP keyboard behaviour ── */
+    document.addEventListener('DOMContentLoaded', function() {
+        var boxes = getBoxes();
+        boxes.forEach(function(box, idx) {
+            box.addEventListener('keydown', function(e) {
+                hideErr();
+                if (['Backspace','Tab','ArrowLeft','ArrowRight','Delete'].includes(e.key)) {
+                    if (e.key === 'Backspace' && !box.value && idx > 0) {
+                        boxes[idx-1].value = '';
+                        boxes[idx-1].classList.remove('filled');
+                        boxes[idx-1].focus();
+                    }
+                    return;
+                }
+                if (!/^\d$/.test(e.key)) { e.preventDefault(); }
+            });
+            box.addEventListener('input', function() {
+                var val = box.value.replace(/\D/g,'');
+                /* Handle paste of full OTP */
+                if (val.length > 1) {
+                    var digits = val.split('');
+                    boxes.forEach(function(b, i){ b.value = digits[i]||''; b.classList.toggle('filled',!!b.value); });
+                    boxes[Math.min(digits.length, boxes.length-1)].focus();
+                    if (getOTP().length === 4) verifyOTP();
+                    return;
+                }
+                box.value = val;
+                box.classList.toggle('filled', !!val);
+                if (val && idx < boxes.length-1) boxes[idx+1].focus();
+                if (getOTP().length === 4) verifyOTP();
+            });
+        });
+    });
+
+    /* ── Validate & send OTP ── */
+    function startOTP() {
+        var name   = document.getElementById('f-name').value.trim();
+        var phone  = document.getElementById('f-phone').value.trim();
+        var goal   = document.getElementById('f-goal').value;
+        var invest = document.getElementById('f-invest').value;
+        if (!name)                        { alert('Please enter your name.'); return; }
+        if (!/^[6-9]\d{9}$/.test(phone)) { alert('Please enter a valid 10-digit mobile number.'); return; }
+        if (!goal)                        { alert('Please select your health concern.'); return; }
+        if (!invest)                      { alert('Please select investment readiness.'); return; }
+
+        configuration.identifier = '+91' + phone;
+        if (typeof window.initSendOTP === 'function') window.initSendOTP(configuration);
+        if (typeof window.sendOTP     === 'function') window.sendOTP();
+
+        document.getElementById('otp-num').textContent = '+91 ' + phone;
+        clearBoxes();
+        hideErr();
+        goStep(2);
+    }
+
+    function resendOTP() {
+        clearBoxes(); hideErr();
+        if (typeof window.sendOTP  === 'function') window.sendOTP();
+        else if (typeof window.retryOTP === 'function') window.retryOTP();
+    }
+
+    /* ── Button tap ── */
+    function submitOTPForm() {
+        var otp = getOTP();
+        if (otp.length < 4) {
+            showErr('Please enter all 4 digits.');
+            return;
+        }
+        verifyOTP();
+    }
+
+    /* ── Verify via MSG91 ── */
+    function verifyOTP() {
+        var otp = getOTP();
+        if (otp.length < 4) return;
+
+        /* Disable button — result comes back via configuration.success / configuration.failure */
+        var btn = document.getElementById('verify-btn');
+        btn.disabled = true;
+        btn.textContent = 'Verifying…';
+
+        if (typeof window.verifyOtp === 'function') {
+            /* No callback — MSG91 fires configuration.success or configuration.failure */
+            window.verifyOtp(otp);
+        } else {
+            /* MSG91 script not loaded */
+            btn.disabled = false;
+            btn.innerHTML = 'Verify &amp; Continue <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+            showErr('Verification service unavailable. Please refresh and try again.');
+        }
+    }
+
+    /* ── Save to Google Sheets ── */
+    function submitLead(token) {
+        var payload = {
+            name:      document.getElementById('f-name').value.trim(),
+            phone:     '+91' + document.getElementById('f-phone').value.trim(),
+            concern:   document.getElementById('f-goal').value,
+            invest:    document.getElementById('f-invest').value,
+            verified:  true,
+            token:     token,
+            timestamp: new Date().toISOString()
+        };
+        fetch(SHEETS_URL, {
+            method:'POST', mode:'no-cors',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify(payload)
+        }).catch(function(e){ console.log('Sheets:', e); });
+        goStep(3);
+    }
+
+    /* ── Reviews ── */
+    var reviews = [
+        { name:"Danish Wali",    text:"I had an amazing experience with Insha from niwi.ai. She really listens and understands your lifestyle before creating a plan. Nothing felt extreme or restrictive. I have seen steady progress and feel much more confident about my eating habits now. Highly recommend!" },
+        { name:"Sharada Panwar", text:"I joined Niwi AI under Dietician Swata Marik, and the experience has been excellent. She gave me a completely kitchen-friendly diet that fit into my daily routine and was planned carefully according to my medical condition. My weight went down from 101 kgs to 96 kgs, my energy levels have improved, and I no longer struggle with constant sugar cravings. The plan was easy to follow and never felt like a punishment. Excellent result and highly recommended for anyone looking for a sustainable and health-focused weight loss journey." },
+        { name:"Kiran Singh",    text:"I have been following the diet plan for the past 2 months now, and I am genuinely impressed with the results. The structure is simple, practical, and easy to stick to, even with a busy schedule. It does not feel restrictive — there is a perfect balance of nutrition, taste, and flexibility. It has helped me manage my sugar level, improved D3 and B12, and my hemoglobin levels have gone up. My clothes are fitting well, I am back to my normal shape with inch loss around the waist. Swata Marik accommodates all my requests. I would surely recommend her any time." },
+        { name:"Ashita Tiwari",  text:"Achieved 3.7 kg Loss in 20 Days! Working with Ruchi Mahajan and Gouri Masurkar made all the difference. A balanced plan focused on smart choices and consistency — not starving. My energy shot up by day 5. Bloating decreased drastically. Meals were full and satisfying. Clothes are fitting better. Highly recommend for anyone who wants real results without burnout." },
+        { name:"Arti Pawarr",    text:"I have joined Niwi.ai 3 months back and I am very happy with results. I have lost around 10 kgs in 3 months. Amazing service! Senior Dietician Divya Saigal and Dietician Akanksha Nikam helped me reach my weight goals in a healthy, sustainable way. Friendly atmosphere and great results." },
+        { name:"Laiba Noor Nabi",text:"Joining niwi.ai was the best decision for my PCOS. Dt Arisha gave me a healthy, kitchen-friendly diet that fit perfectly into my routine. My bloating reduced, periods became more regular, and my energy levels improved. She is very supportive and always available for doubts. If you want real results with a gentle approach, this is the place to be." },
+        { name:"Arati Mishra",   text:"I have been consulting Sr. Dietician Harvinder Chauhan from Niwi.ai and Dietician Swata Marik, and my experience has been outstanding. The diet plans were kitchen-friendly, easy to follow, and customized according to my medical condition. I have seen excellent results — losing 10 kgs since May, all through effective dietary changes and no extreme restrictions. Highly recommended for real, long-term results." },
+        { name:"Mandavi Sarraf", text:"Thank you, Dt. Arisha Naeem. Your diet plan made a huge difference for me. When I was struggling with PCOD, your guidance truly changed my journey with NIWI. I started feeling healthier, more energetic, and finally in control of my symptoms. A plan that was simple, practical, and easy to follow. I am genuinely grateful for your support." },
+        { name:"Pooja Malhotra", text:"I have been working with Ruchi on and off since 2016 — not just for weight loss but to also maintain my health. Her diet plans are easy to follow, keeping in mind your personal preferences. I now live in Canada and have continued with her despite the time difference. She has been very accommodating and flexible. Would recommend for anyone looking to lose weight or just have a curated meal plan." }
+    ];
+
+    function openReview(i) {
+        document.getElementById('m-name').textContent = reviews[i].name;
+        document.getElementById('m-text').textContent = reviews[i].text;
+        document.getElementById('rev-modal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeReview() {
+        document.getElementById('rev-modal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+</script>
+
+</body>
+</html>
